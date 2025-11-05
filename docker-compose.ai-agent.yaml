@@ -1,15 +1,42 @@
 #ddev-generated
-services:
-  ai-agent:
-    container_name: ddev-${DDEV_SITENAME}-ai-agent
-    image: ${AI_AGENT_DOCKER_IMAGE:-ddev/ddev-utilities:latest}
-    command: tail -f /dev/null
-    restart: "no"
-    # These labels ensure this service is discoverable by DDEV.
-    labels:
-      com.ddev.site-name: ${DDEV_SITENAME}
-      com.ddev.approot: ${DDEV_APPROOT}
+x-ddev-common-ai-labels: &ddev-common-ai-agent-labels
+  com.ddev.site-name: ${DDEV_SITENAME}
+  com.ddev.approot: ${DDEV_APPROOT}
 
+services:
+  n8n:
+    container_name: ddev-${DDEV_SITENAME}-n8n
+    image: n8nio/n8n:latest
+    restart: unless-stopped
+    environment:
+      - N8N_HOST=${DDEV_HOSTNAME}
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - N8N_SECURE_COOKIE=false
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY:-localdev-fixed-key}
+      - VIRTUAL_HOST=${DDEV_HOSTNAME}
+      - HTTP_EXPOSE=5678:5678
+      - HTTPS_EXPOSE=5678:5678
+    expose:
+      - "5678"
     volumes:
-      - ".:/mnt/ddev_config"
-      - "ddev-global-cache:/mnt/ddev-global-cache"
+      - n8n_data:/home/node/.n8n
+    labels:
+      <<: *ddev-common-ai-agent-labels
+
+  supabase-db:
+    container_name: ddev-${DDEV_SITENAME}-supabase-db
+    image: supabase/postgres:15.1.0.104
+    restart: unless-stopped
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - supabase_db_data:/var/lib/postgresql/data
+    labels:
+      <<: *ddev-common-ai-agent-labels
+
+volumes:
+  n8n_data: {}
+  supabase_db_data: {}
