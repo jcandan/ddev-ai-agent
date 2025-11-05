@@ -50,6 +50,16 @@ This reapplies the current add-on definition and restarts the environment.
 
 ---
 
+## Resources
+
+* [DDEV Add-ons: Creating, maintaining, testing](https://www.youtube.com/watch?v=TmXqQe48iqE) (part of the [DDEV Contributor Live Training](https://ddev.com/blog/contributor-training))
+* [Advanced Add-On Techniques](https://ddev.com/blog/advanced-add-on-contributor-training/)
+* [DDEV Add-on Maintenance Guide](https://ddev.com/blog/ddev-add-on-maintenance-guide/)
+* [DDEV Documentation for Add-ons](https://ddev.readthedocs.io/en/stable/users/extend/additional-services/)
+* [DDEV Add-on Registry](https://addons.ddev.com/)
+
+---
+
 ## Testing
 
 See [tests/test.bats]
