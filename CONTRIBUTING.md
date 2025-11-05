@@ -22,7 +22,7 @@ Use a clean directory (outside this repo):
 ```bash
 mkdir ~/projects/my-ai-agent
 cd ~/projects/my-ai-agent
-ddev config --project-name my-ai-agent --project-type=generic --docroot=.
+ddev config --project-name=my-ai-agent --project-type=generic --docroot=.
 ```
 
 ### 3. Install the add-on from your local path
