@@ -3,11 +3,12 @@
 [![last commit](https://img.shields.io/github/last-commit/jcandan/ddev-ai-agent)](https://github.com/jcandan/ddev-ai-agent/commits)
 [![release](https://img.shields.io/github/v/release/jcandan/ddev-ai-agent)](https://github.com/jcandan/ddev-ai-agent/releases/latest)
 
-# DDEV Ai Agent
+# DDEV AI Agent
 
 ## Overview
 
-This add-on integrates Ai Agent into your [DDEV](https://ddev.com/) project.
+A [DDEV](https://ddev.com) add-on to spin up a simple, opinionated, customizable
+n8n/supabase AI Agent workflow stack with sensible defaults.
 
 ## Installation
 
@@ -20,29 +21,33 @@ After installation, make sure to commit the `.ddev` directory to version control
 
 ## Usage
 
-| Command | Description |
-| ------- | ----------- |
-| `ddev describe` | View service status and used ports for Ai Agent |
-| `ddev logs -s ai-agent` | Check Ai Agent logs |
+| Command                       | Description                 |
+| ----------------------------- | --------------------------- |
+| `ddev start` / `ddev restart` | Launch or rebuild the stack |
+| `ddev describe`               | View services and URLs      |
+| `ddev logs -s n8n`            | Tail n8n logs               |
+| `ddev logs -s supabase-db`    | Tail Postgres logs          |
 
-## Advanced Customization
+Access **n8n** at `https://<project>.ddev.site:5678`
 
-To change the Docker image:
+## Requirements
 
-```bash
-ddev dotenv set .ddev/.env.ai-agent --ai-agent-docker-image="ddev/ddev-utilities:latest"
-ddev add-on get jcandan/ddev-ai-agent
-ddev restart
-```
+* DDEV ≥ 1.24.3
+* Docker
 
-Make sure to commit the `.ddev/.env.ai-agent` file to version control.
+> NOTE: DDEV touts itself as a Docker-based PHP development environment, but it
+> really is a docker-compose abstraction the affords us the ability to simplify
+> providing you with a customizable AI Agent development environment with
+> sensible, opinionated defaults. If you're not interested in PHP, you can
+> proceed to use this project undaunted.
 
-All customization options (use with caution):
+## Roadmap
 
-| Variable | Flag | Default |
-| -------- | ---- | ------- |
-| `AI_AGENT_DOCKER_IMAGE` | `--ai-agent-docker-image` | `ddev/ddev-utilities:latest` |
+See [Roadmap](https://github.com/jcandan/ddev-ai-agent/wiki/Roadmap) for details
+about our plans for the future.
 
 ## Credits
 
 **Contributed and maintained by [@jcandan](https://github.com/jcandan)**
+
+Inspired by [@coleam00](https://github.com/coleam00)'s [local-ai-packaged](https://github.com/coleam00/local-ai-packaged).
