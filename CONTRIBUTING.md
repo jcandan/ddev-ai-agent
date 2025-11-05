@@ -61,3 +61,12 @@ See [tests/test.bats]
 * Use [GitHub Issues](https://github.com/jcandan/ddev-ai-agent/issues) for bug reports and enhancements.
 * PRs are welcome; include reasoning for architectural choices.
 * Keep commits atomic and descriptive; use conventional commits.
+
+## Maintainers
+
+DO NOT MERGE PRs VIA GUI!
+
+Surprisingly, GitHub does not provide a fast-forward merge options for pull
+requests. When a PR is ready, perform a fast-forward merge locally.
+
+<!-- @todo Add GitHub action to simplify fast-foward merges from PRs -->
