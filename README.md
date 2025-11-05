@@ -10,13 +10,25 @@
 A [DDEV](https://ddev.com) add-on to spin up a simple, opinionated, customizable
 n8n/supabase AI Agent workflow stack with sensible defaults.
 
----
+## Getting Started
 
-Makes it as simple as:
+Create a DDEV project.
 
-1. `ddev add-on get jcandan/ddev-ai-agent`
-2. `ddev start`
-3. Browse **n8n** at `https://<project>.ddev.site:5678`
+```bash
+mkdir my-ai-agent
+cd my-ai-agent
+ddev config --project-name=my-ai-agent --project-type=generic --docroot=.
+```
+
+Then, get this add-on and start the project.
+
+```bash
+ddev add-on get jcandan/ddev-ai-agent
+ddev restart
+ddev launch :5678
+```
+
+After launch, you may commit the `.ddev` directory to version control.
 
 ## Requirements
 
@@ -31,25 +43,6 @@ Install and start using DDEV.
 > providing you with a customizable AI Agent development environment with
 > sensible, opinionated defaults. If you're not interested in PHP, you can
 > proceed to use this project undaunted.
-
-## Getting Started
-
-First, create a DDEV project.
-
-```bash
-mkdir ~/projects/my-ai-agent
-cd ~/projects/my-ai-agent
-ddev config --project-name=my-ai-agent --project-type=generic --docroot=.
-```
-
-Then, get this add-on and start the project.
-
-```bash
-ddev add-on get jcandan/ddev-ai-agent
-ddev restart
-```
-
-After installation, make sure to commit the `.ddev` directory to version control.
 
 ## Usage
 
