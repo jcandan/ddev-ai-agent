@@ -47,9 +47,12 @@ health_checks() {
   # assert_output --partial "test_header"
 
   # Or check if some command gives expected output:
-  DDEV_DEBUG=true run ddev launch
-  assert_success
-  assert_output --partial "FULLURL https://${PROJNAME}.ddev.site"
+  # DDEV_DEBUG=true run ddev launch
+  # assert_success
+  # assert_output --partial "FULLURL https://${PROJNAME}.ddev.site"
+
+  run curl -sfI https://${PROJNAME}.ddev.site:5678
+  assert_output --partial "HTTP/2 200"
 }
 
 teardown() {
