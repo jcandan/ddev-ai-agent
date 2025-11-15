@@ -2,5 +2,6 @@ name: ai-agent
 
 project_files:
   - docker-compose.ai-agent.yaml
+  - searxng/settings.yml
 
 ddev_version_constraint: '>= v1.24.3'

@@ -53,6 +53,12 @@ health_checks() {
 
   run curl -sfI https://${PROJNAME}.ddev.site:5678
   assert_output --partial "HTTP/2 200"
+  run ddev exec -s web sh -lc '
+    curl -sS -o /tmp/searxng_test.json -w "%{http_code}" \
+      "http://searxng:8080/search?q=test&format=json"
+  '
+  assert_success
+  assert_output "200"
 }
 
 teardown() {

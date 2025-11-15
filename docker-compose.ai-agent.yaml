@@ -37,6 +37,18 @@ services:
     labels:
       <<: *ddev-common-ai-agent-labels
 
+  searxng:
+    container_name: ddev-${DDEV_SITENAME}-searxng
+    image: searxng/searxng:latest
+    restart: unless-stopped
+    environment:
+      - SEARXNG_BIND_ADDRESS=0.0.0.0:8080
+      - SEARXNG_SECRET_KEY=${SEARXNG_SECRET_KEY:-localdev-searxng-secret}
+    volumes:
+      - ./searxng/settings.yml:/etc/searxng/settings.yml:ro
+    labels:
+      <<: *ddev-common-ai-agent-labels
+
 volumes:
   n8n_data: {}
   supabase_db_data: {}
