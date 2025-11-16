@@ -86,7 +86,7 @@ See [`tests/test.bats`](tests/test.bats) for the test entrypoint.
 
 ## Releases
 
-Pushes to the `main` branch can automatically create a new Git tag and release
+Pushes to certain branches automatically create SemVer tags and releases
 via `.github/workflows/release-on-main.yml`.
 
 We use:
@@ -96,12 +96,6 @@ We use:
 * [`ncipollo/release-action`](https://github.com/ncipollo/release-action)
   to create a GitHub Release, using GitHub’s **“Generate release notes”**
   feature.
-
-### Tag format
-
-* Tags are plain SemVer: `0.1.0`, `0.2.0`, `1.0.0`, etc.
-* There is **no** `v` prefix (to match other DDEV add-ons and the DDEV add-on
-  registry).
 
 ### Commit message rules (Conventional Commits)
 
@@ -115,16 +109,41 @@ Version bumps are driven by **Conventional Commits** on `main`. In practice:
 Other types such as `chore:`, `ci:`, `docs:`, `refactor:` generally do
 **not** cause a version bump on their own.
 
-Because we use fast-forward merges, maintainers are expected to make sure the
-commits that land on `main` follow this pattern. That can mean:
+### Release Channels
 
-* Enforcing Conventional Commits in branches/PRs, or
-* Cleaning up commit messages (e.g. interactive rebase) before fast-forwarding
-  to `main`.
+The branch you push to determines the release channel:
 
-When a new SemVer tag is created, `release-on-main` also creates a
-GitHub Release and uses GitHub’s **generated release notes**, based on
-the commits and merged PRs since the previous tag.
+| Branch  | Release Type      | Tag Examples     |
+| ------- | ----------------- | ---------------- |
+| `main`  | stable            | `0.3.0`, `1.0.1` |
+| `rc`    | release candidate | `1.2.0-rc.1`     |
+| `beta`  | beta prerelease   | `1.2.0-beta.3`   |
+| `alpha` | alpha prerelease  | `1.2.0-alpha.1`  |
+
+GitHub Releases use GitHub’s **generated release notes**.
+
+### Workflow Expectations
+
+Because we use **fast-forward merges**, maintainers must:
+
+1. Ensure commits landing on `main`, `rc`, `beta`, or `alpha` use Conventional Commit messages.
+2. Use `feat!:` or `BREAKING CHANGE:` when introducing breaking changes.
+3. Merge locally with:
+
+   ```bash
+   git checkout main
+   git fetch origin
+   git merge --ff-only feature/my-feature
+   git push origin main
+   ```
+4. Pushing to the appropriate branch will:
+
+   * Run the tests.
+   * Generate a new semver tag.
+   * Create a GitHub Release.
+
+Stable releases come from `main`.
+Pre-releases come from `rc`, `beta`, and `alpha`.
 
 ---
 
@@ -138,38 +157,64 @@ the commits and merged PRs since the previous tag.
 
 ## Maintainers
 
-DO NOT MERGE PRs VIA THE GITHUB GUI.
+DO NOT MERGE PRs VIA THE GITHUB UI.
 
-GitHub does not provide a fast-forward merge option for pull requests, and this
-repository expects a **linear `main` history**.
+While `alpha`, `beta`, or `rc` is default branch, swap below `main` for that
+pre-release branch.
+
+GitHub does not support squash-and-fast-forward merges, and this repository
+expects a **linear `main` history** where each change lands as a single,
+clean, Conventional Commit.
 
 When a PR is ready:
 
-1. Confirm the **tests workflow is green** for that PR.
-2. Ensure the commits that will land on `main` use Conventional Commit-style
-   messages so the release bump is appropriate:
-
-   * `feat:` for new features,
-   * `fix:` for bug fixes,
-   * `feat!:`, `fix!:`, or `BREAKING CHANGE:` for breaking changes,
-   * `chore:`, `ci:`, `docs:`, etc. for non-release-impacting work.
-3. Perform a **fast-forward merge** locally into `main`:
+1. Confirm the **tests workflow is green**.
+2. Make sure the resulting commit will use a proper **Conventional Commit**
+   message so the automated release workflow can determine the correct bump.
+3. Check out `main` and ensure it is up to date:
 
    ```bash
    git checkout main
    git fetch origin
-   git merge --ff-only feature/my-branch
+   git reset --hard origin/main
+   ```
+
+4. Squash-merge the PR branch directly onto `main`:
+
+   ```bash
+   git merge --squash feature/my-branch
+   ```
+
+   This stages all changes without creating a merge commit.
+
+5. Commit once with a Conventional Commit message **and a closing footer**:
+
+   ```bash
+   git commit -m "feat: add searxng integration
+
+   Closes #123"
+   ```
+
+   Use `feat!:`, `fix!:`, or a `BREAKING CHANGE:` footer for breaking changes.
+
+6. Push to `main`:
+
+   ```bash
    git push origin main
    ```
-4. The push to `main` will:
 
-   * Re-run the tests on `main`.
-   * Run `release-on-main`, which:
+The commit footer (`Closes #123`) will automatically close the associated
+issue or PR. The PR will appear as **Closed** (not “Merged”), which is
+expected for this workflow.
 
-     * Computes the next SemVer tag from commit messages.
-     * Pushes that tag.
-     * Creates a GitHub Release with generated release notes.
+Pushing to `main` will:
 
-Keep the history clean and readable. Small, focused commits with clear,
-Conventional Commit-style messages make it much easier to understand and
-trust the automated releases.
+* Re-run the tests
+* Trigger `release-on-main.yml`:
+
+  * Compute the next SemVer version from the commit message
+  * Push the tag
+  * Create a GitHub Release with generated release notes
+
+Keep the history clean and readable. Each change should result in a single
+Conventional Commit on `main`, `rc`, `beta`, or `alpha`.
