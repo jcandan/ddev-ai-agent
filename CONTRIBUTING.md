@@ -25,7 +25,7 @@ cd ~/projects/my-ai-agent
 ddev config --project-name=my-ai-agent --project-type=generic --docroot=.
 ```
 
-### 3. Install the add-on from your local path
+### 4. Install the add-on from your local path
 
 ```bash
 ddev add-on get ./path/to/ddev-ai-agent
@@ -62,39 +62,69 @@ This reapplies the current add-on definition and restarts the environment.
 
 ## Testing
 
-This repository uses a GitHub Actions workflow (`.github/workflows/tests.yml`)
-to run the add-on tests via `ddev/github-action-add-on-test`.
+This repository uses `.github/workflows/tests.yml` to run the DDEV add-on
+test matrix via `ddev/github-action-add-on-test`.
 
-- Tests run on:
-  - Every pull request.
-  - Every push to `main`.
-  - A nightly scheduled run.
-  - Manual `workflow_dispatch` (with optional debug).
+The tests run:
 
-Before merging a PR, ensure the **tests workflow is green**. Since `main` auto-
-releases on every push (see below), `main` must always be in a releasable state.
+* On every **pull request** (except changes that only touch `*.md` files).
+* On every **push to `main`**.
+* On a nightly **schedule**.
+* On manual **workflow_dispatch** (with optional `debug_enabled`).
 
-See [tests/test.bats] for the test entrypoint.
+The matrix currently runs against:
+
+* `ddev_version: stable`
+* `ddev_version: HEAD`
+
+Before merging a PR, ensure the **tests workflow is green**. Since `main`
+can trigger releases, `main` must always be in a releasable state.
+
+See [`tests/test.bats`](tests/test.bats) for the test entrypoint.
 
 ---
 
 ## Releases
 
-Pushes to the `main` branch automatically create a new GitHub Release and
-semantic version tag via `.github/workflows/release-on-main.yml` (using the
-`Tag/Release on Push` action).
+Pushes to the `main` branch can automatically create a new Git tag and release
+via `.github/workflows/release-on-main.yml`.
 
-- By default, the workflow bumps the **minor** version (e.g. `v0.1.0` → `v0.2.0`).
-- You can override the bump per PR using labels:
-  - `release:major`
-  - `release:minor`
-  - `release:patch`
-- You can skip a release by:
-  - Adding the `norelease` label to the PR, or
-  - Including `[norelease]` in the commit title.
+We use:
 
-Because every push to `main` produces a release, **all changes must land on
-`main` via PRs with passing tests**.
+* [`mathieudutour/github-tag-action`](https://github.com/mathieudutour/github-tag-action)
+  to compute and push the next SemVer tag based on commit messages.
+* [`ncipollo/release-action`](https://github.com/ncipollo/release-action)
+  to create a GitHub Release, using GitHub’s **“Generate release notes”**
+  feature.
+
+### Tag format
+
+* Tags are plain SemVer: `0.1.0`, `0.2.0`, `1.0.0`, etc.
+* There is **no** `v` prefix (to match other DDEV add-ons and the DDEV add-on
+  registry).
+
+### Commit message rules (Conventional Commits)
+
+Version bumps are driven by **Conventional Commits** on `main`. In practice:
+
+* `fix: ...` → **patch** bump (e.g. `0.1.3` → `0.1.4`)
+* `feat: ...` → **minor** bump (e.g. `0.1.3` → `0.2.0`)
+* `feat!: ...` or `fix!: ...` or a footer with `BREAKING CHANGE:`
+  → **major** bump (e.g. `0.1.3` → `1.0.0`)
+
+Other types such as `chore:`, `ci:`, `docs:`, `refactor:` generally do
+**not** cause a version bump on their own.
+
+Because we use fast-forward merges, maintainers are expected to make sure the
+commits that land on `main` follow this pattern. That can mean:
+
+* Enforcing Conventional Commits in branches/PRs, or
+* Cleaning up commit messages (e.g. interactive rebase) before fast-forwarding
+  to `main`.
+
+When a new SemVer tag is created, `release-on-main` also creates a
+GitHub Release and uses GitHub’s **generated release notes**, based on
+the commits and merged PRs since the previous tag.
 
 ---
 
@@ -102,13 +132,44 @@ Because every push to `main` produces a release, **all changes must land on
 
 * Use [GitHub Issues](https://github.com/jcandan/ddev-ai-agent/issues) for bug reports and enhancements.
 * PRs are welcome; include reasoning for architectural choices.
-* Keep commits atomic and descriptive; use conventional commits.
+* Keep commits atomic and descriptive; use Conventional Commits (`feat:`, `fix:`, `chore:`, `ci:`, etc.).
+
+---
 
 ## Maintainers
 
-DO NOT MERGE PRs VIA GUI!
+DO NOT MERGE PRs VIA THE GITHUB GUI.
 
-Surprisingly, GitHub does not provide a fast-forward merge options for pull
-requests. When a PR is ready, perform a fast-forward merge locally.
+GitHub does not provide a fast-forward merge option for pull requests, and this
+repository expects a **linear `main` history**.
 
-<!-- @todo Add GitHub action to simplify fast-foward merges from PRs -->
+When a PR is ready:
+
+1. Confirm the **tests workflow is green** for that PR.
+2. Ensure the commits that will land on `main` use Conventional Commit-style
+   messages so the release bump is appropriate:
+
+   * `feat:` for new features,
+   * `fix:` for bug fixes,
+   * `feat!:`, `fix!:`, or `BREAKING CHANGE:` for breaking changes,
+   * `chore:`, `ci:`, `docs:`, etc. for non-release-impacting work.
+3. Perform a **fast-forward merge** locally into `main`:
+
+   ```bash
+   git checkout main
+   git fetch origin
+   git merge --ff-only feature/my-branch
+   git push origin main
+   ```
+4. The push to `main` will:
+
+   * Re-run the tests on `main`.
+   * Run `release-on-main`, which:
+
+     * Computes the next SemVer tag from commit messages.
+     * Pushes that tag.
+     * Creates a GitHub Release with generated release notes.
+
+Keep the history clean and readable. Small, focused commits with clear,
+Conventional Commit-style messages make it much easier to understand and
+trust the automated releases.

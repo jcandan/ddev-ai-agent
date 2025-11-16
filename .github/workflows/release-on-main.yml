@@ -6,32 +6,43 @@ on:
       - main
 
 jobs:
-  release-on-push:
+  tag-and-release:
     runs-on: ubuntu-latest
 
-    # Needed so the action can create tags & releases,
-    # and read PR labels to decide major/minor/patch bumps.
+    # Needed so the action can push tags and create releases.
     permissions:
       contents: write
-      pull-requests: read
 
     steps:
       - name: Checkout repository with tags
         uses: actions/checkout@v4
         with:
-          # Full history so release-on-push can see previous releases
+          # Full history so github-tag-action can see previous tags
           # and compute the next semantic version.
           fetch-depth: 0
 
-      - name: Tag and create GitHub Release
-        uses: rymndhng/release-on-push-action@v0.28.0
+      - name: Bump version and create tag from Conventional Commits
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
         with:
-          # Default bump when no PR label overrides exist.
-          # Override per PR with labels: release:major | release:minor | release:patch.
-          bump_version_scheme: minor
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
-          # Releases will be tagged like v0.1.0, v0.2.0, etc.
-          tag_prefix: "v"
+          # Do not set default_bump so commit messages decide the bump:
+          # - feat:            -> minor
+          # - fix:             -> patch
+          # - feat!/fix!/BREAKING CHANGE -> major
+          #
+          # Tags are plain SemVer (e.g. 0.1.0), no "v" prefix.
+          # Limit releases to the main branch.
+          release_branches: main
 
-          # Let GitHub generate the release notes from commits.
-          use_github_release_notes: true
+      - name: Create GitHub Release with generated notes
+        # Only create a release if a new tag was produced.
+        if: ${{ steps.tag_version.outputs.new_tag != '' }}
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.tag_version.outputs.new_tag }}
+
+          # Let GitHub generate release notes from commits/PRs.
+          # This uses the "Generate release notes" feature, not the changelog body.
+          generateReleaseNotes: true
