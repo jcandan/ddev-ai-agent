@@ -1,0 +1,25 @@
+name: Tag and release on push to main
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release-on-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: rymndhng/release-on-push-action@v0.28.0
+        with:
+          bump_version_scheme: minor          # default
+          tag_prefix: "v"                     # so you get v0.1.0
+          use_github_release_notes: true      # or false for its own summary
+          # optional:
+          # release_body: "ddev-ai-agent add-on release."
+          # max_commits: 100
