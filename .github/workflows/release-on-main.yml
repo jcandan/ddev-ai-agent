@@ -8,18 +8,30 @@ on:
 jobs:
   release-on-push:
     runs-on: ubuntu-latest
+
+    # Needed so the action can create tags & releases,
+    # and read PR labels to decide major/minor/patch bumps.
     permissions:
       contents: write
       pull-requests: read
 
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: rymndhng/release-on-push-action@v0.28.0
+      - name: Checkout repository with tags
+        uses: actions/checkout@v4
         with:
-          bump_version_scheme: minor          # default
-          tag_prefix: "v"                     # so you get v0.1.0
-          use_github_release_notes: true      # or false for its own summary
-          # optional:
-          # release_body: "ddev-ai-agent add-on release."
-          # max_commits: 100
+          # Full history so release-on-push can see previous releases
+          # and compute the next semantic version.
+          fetch-depth: 0
+
+      - name: Tag and create GitHub Release
+        uses: rymndhng/release-on-push-action@v0.28.0
+        with:
+          # Default bump when no PR label overrides exist.
+          # Override per PR with labels: release:major | release:minor | release:patch.
+          bump_version_scheme: minor
+
+          # Releases will be tagged like v0.1.0, v0.2.0, etc.
+          tag_prefix: "v"
+
+          # Let GitHub generate the release notes from commits.
+          use_github_release_notes: true
