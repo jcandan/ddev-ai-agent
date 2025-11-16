@@ -62,7 +62,39 @@ This reapplies the current add-on definition and restarts the environment.
 
 ## Testing
 
-See [tests/test.bats]
+This repository uses a GitHub Actions workflow (`.github/workflows/tests.yml`)
+to run the add-on tests via `ddev/github-action-add-on-test`.
+
+- Tests run on:
+  - Every pull request.
+  - Every push to `main`.
+  - A nightly scheduled run.
+  - Manual `workflow_dispatch` (with optional debug).
+
+Before merging a PR, ensure the **tests workflow is green**. Since `main` auto-
+releases on every push (see below), `main` must always be in a releasable state.
+
+See [tests/test.bats] for the test entrypoint.
+
+---
+
+## Releases
+
+Pushes to the `main` branch automatically create a new GitHub Release and
+semantic version tag via `.github/workflows/release-on-main.yml` (using the
+`Tag/Release on Push` action).
+
+- By default, the workflow bumps the **minor** version (e.g. `v0.1.0` → `v0.2.0`).
+- You can override the bump per PR using labels:
+  - `release:major`
+  - `release:minor`
+  - `release:patch`
+- You can skip a release by:
+  - Adding the `norelease` label to the PR, or
+  - Including `[norelease]` in the commit title.
+
+Because every push to `main` produces a release, **all changes must land on
+`main` via PRs with passing tests**.
 
 ---
 
