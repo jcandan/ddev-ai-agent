@@ -4,6 +4,7 @@ services:
     container_name: ddev-${DDEV_SITENAME}-ollama
     image: ollama/ollama:latest
     restart: unless-stopped
+    # Only start this when explicitly requested.
     profiles:
       - ollama
     volumes:
@@ -15,9 +16,6 @@ services:
     labels:
       com.ddev.site-name: ${DDEV_SITENAME}
       com.ddev.approot: ${DDEV_APPROOT}
-      com.ddev.platform: docker
-      com.ddev.type: service
-      com.ddev.service: ollama
 
 volumes:
   ollama_data: {}
