@@ -39,23 +39,20 @@ setup() {
 }
 
 health_checks() {
-  # Do something useful here that verifies the add-on
-
-  # You can check for specific information in headers:
-  # run curl -sfI https://${PROJNAME}.ddev.site
-  # assert_output --partial "HTTP/2 200"
-  # assert_output --partial "test_header"
-
-  # Or check if some command gives expected output:
-  # DDEV_DEBUG=true run ddev launch
-  # assert_success
-  # assert_output --partial "FULLURL https://${PROJNAME}.ddev.site"
-
+  # Main n8n UI should be up.
   run curl -sfI https://${PROJNAME}.ddev.site:5678
   assert_output --partial "HTTP/2 200"
+
+  # SearXNG JSON search should return HTTP 200.
   run ddev exec -s web sh -lc '
-    curl -sS -o /tmp/searxng_test.json -w "%{http_code}" \
-      "http://searxng:8080/search?q=test&format=json"
+    curl -sS -w "%{http_code}" "http://searxng:8080/search?q=test&format=json" -o /dev/null
+  '
+  assert_success
+  assert_output "200"
+
+  # Ollama /api/version should return HTTP 200 when the ollama profile is enabled.
+  run ddev exec -s web sh -lc '
+    curl -sS -w "%{http_code}" "http://ollama:11434/api/version" -o /dev/null
   '
   assert_success
   assert_output "200"
@@ -78,7 +75,7 @@ teardown() {
   echo "# ddev add-on get ${DIR} with project ${PROJNAME} in $(pwd)" >&3
   run ddev add-on get "${DIR}"
   assert_success
-  run ddev restart -y
+  run ddev start -y --profiles ollama
   assert_success
   health_checks
 }
@@ -89,7 +86,7 @@ teardown() {
   echo "# ddev add-on get ${GITHUB_REPO} with project ${PROJNAME} in $(pwd)" >&3
   run ddev add-on get "${GITHUB_REPO}"
   assert_success
-  run ddev restart -y
+  run ddev start -y --profiles ollama
   assert_success
   health_checks
 }
