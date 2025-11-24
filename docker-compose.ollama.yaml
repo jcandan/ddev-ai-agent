@@ -13,6 +13,14 @@ services:
     environment:
       # Keep the model server warm for a while between requests.
       - OLLAMA_KEEP_ALIVE=24h
+    # Explicit readiness signal for DDEV / Docker:
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      # ~2 minutes max
+      retries: 12
+      start_period: 20s
     labels:
       com.ddev.site-name: ${DDEV_SITENAME}
       com.ddev.approot: ${DDEV_APPROOT}
