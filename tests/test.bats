@@ -88,6 +88,8 @@ teardown() {
   echo "# ddev add-on get ${GITHUB_REPO} with project ${PROJNAME} in $(pwd)" >&3
   run ddev add-on get "${GITHUB_REPO}"
   assert_success
+  run ddev restart -y
+  assert_success
   run ddev start -y --profiles=ollama
   assert_success
   health_checks
