@@ -1,0 +1,21 @@
+#ddev-generated
+services:
+  ollama:
+    container_name: ddev-${DDEV_SITENAME}-ollama
+    image: ollama/ollama:latest
+    restart: no
+    # Only start this when explicitly requested.
+    profiles:
+      - ollama
+    volumes:
+      # Persist models per project.
+      - ollama_data:/root/.ollama
+    environment:
+      # Keep the model server warm for a while between requests.
+      - OLLAMA_KEEP_ALIVE=24h
+    labels:
+      com.ddev.site-name: ${DDEV_SITENAME}
+      com.ddev.approot: ${DDEV_APPROOT}
+
+volumes:
+  ollama_data: {}

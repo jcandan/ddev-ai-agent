@@ -55,6 +55,33 @@ Install and start using DDEV.
 
 Access **n8n** at `https://<project>.ddev.site:5678`
 
+### Optional local LLM (Ollama)
+
+This add-on can optionally start a local Ollama LLM service using a DDEV profile.
+
+Start the stack with the `ollama` profile:
+
+```bash
+ddev start --profiles ollama
+```
+
+From other services in the stack (for example, n8n), you can reach the local LLM
+at:
+
+http://ollama:11434
+
+Use that URL as the base for your Ollama / OpenAI-compatible nodes in n8n when
+the profile is enabled.
+
+You can check the service connection with:
+
+```bash
+ddev exec curl http://ollama:11434/api/version
+```
+
+The service will be picked up by subsequent `ddev restart`, but to stop the
+`ollama` service, run `ddev stop` and `ddev start` again without the profile.
+
 ## Roadmap
 
 See [Roadmap](https://github.com/jcandan/ddev-ai-agent/wiki/Roadmap) for details
