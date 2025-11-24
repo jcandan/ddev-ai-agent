@@ -3,7 +3,7 @@ services:
   ollama:
     container_name: ddev-${DDEV_SITENAME}-ollama
     image: ollama/ollama:latest
-    restart: unless-stopped
+    restart: no
     # Only start this when explicitly requested.
     profiles:
       - ollama
