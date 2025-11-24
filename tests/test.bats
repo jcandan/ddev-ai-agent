@@ -75,10 +75,8 @@ teardown() {
   echo "# ddev add-on get ${DIR} with project ${PROJNAME} in $(pwd)" >&3
   run ddev add-on get "${DIR}"
   assert_success
-  ddev utility composer-config
-  echo "# output: $output" >&3
   run ddev start -y --profiles=ollama
-  ddev logs ollama
+  echo "# output: $output" >&3
   assert_success
   health_checks
 }
