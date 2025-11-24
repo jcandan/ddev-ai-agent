@@ -75,7 +75,7 @@ teardown() {
   echo "# ddev add-on get ${DIR} with project ${PROJNAME} in $(pwd)" >&3
   run ddev add-on get "${DIR}"
   assert_success
-  run ddev start -v -y --profiles=ollama
+  run ddev start -y --profiles=ollama
   assert_success
   health_checks
 }
@@ -86,7 +86,7 @@ teardown() {
   echo "# ddev add-on get ${GITHUB_REPO} with project ${PROJNAME} in $(pwd)" >&3
   run ddev add-on get "${GITHUB_REPO}"
   assert_success
-  run ddev start -v -y --profiles=ollama
+  run ddev start -y --profiles=ollama
   assert_success
   health_checks
 }

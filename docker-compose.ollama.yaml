@@ -13,9 +13,6 @@ services:
     environment:
       # Keep the model server warm for a while between requests.
       - OLLAMA_KEEP_ALIVE=24h
-    labels:
-      com.ddev.site-name: ${DDEV_SITENAME}
-      com.ddev.approot: ${DDEV_APPROOT}
 
 volumes:
   ollama_data: {}
