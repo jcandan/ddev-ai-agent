@@ -24,31 +24,6 @@ jobs:
           # and compute the next semantic version.
           fetch-depth: 0
 
-      - name: Determine release channel
-        id: channel
-        run: |
-          BRANCH="${GITHUB_REF#refs/heads/}"
-          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
-
-          # Default to stable (main)
-          if [[ "$BRANCH" == "main" ]]; then
-            echo "pre=false" >> $GITHUB_OUTPUT
-            echo "suffix=" >> $GITHUB_OUTPUT
-          elif [[ "$BRANCH" == "rc" ]]; then
-            echo "pre=true" >> $GITHUB_OUTPUT
-            echo "suffix=rc" >> $GITHUB_OUTPUT
-          elif [[ "$BRANCH" == "beta" ]]; then
-            echo "pre=true" >> $GITHUB_OUTPUT
-            echo "suffix=beta" >> $GITHUB_OUTPUT
-          elif [[ "$BRANCH" == "alpha" ]]; then
-            echo "pre=true" >> $GITHUB_OUTPUT
-            echo "suffix=alpha" >> $GITHUB_OUTPUT
-          else
-            # Should never happen because trigger filters branches.
-            echo "pre=false" >> $GITHUB_OUTPUT
-            echo "suffix=" >> $GITHUB_OUTPUT
-          fi
-
       - name: Bump version and create tag from Conventional Commits
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.2
@@ -63,17 +38,16 @@ jobs:
           # Tags are plain SemVer (e.g. 0.1.0), no "v" prefix.
           tag_prefix: ""
 
-          # Stable releases come from main.
-          # Pre-releases come from rc / beta / alpha.
-          pre_release: ${{ steps.channel.outputs.pre }}
-          pre_release_suffix: ${{ steps.channel.outputs.suffix }}
+          # Only main is "stable"
+          release_branches: main
 
-          # Only treat these branches as release branches.
-          release_branches: |
-            main
-            rc
-            beta
-            alpha
+          # These are treated as pre-release branches
+          pre_release_branches: rc,beta,alpha
+
+          # Optional: only create a tag when commits demand a release
+          default_bump: false
+
+          default_prerelease_bump: prerelease
 
       - name: Create GitHub Release with generated notes
         # Only create a release if a new tag was produced.
