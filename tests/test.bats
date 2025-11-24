@@ -76,7 +76,6 @@ teardown() {
   run ddev add-on get "${DIR}"
   assert_success
   run ddev start -y --profiles=ollama
-  echo "# output: $output" >&3
   assert_success
   health_checks
 }
