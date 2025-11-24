@@ -76,8 +76,8 @@ teardown() {
   run ddev add-on get "${DIR}"
   assert_success
   ddev utility composer-config
-  ddev logs ollama
   run ddev start -y --profiles=ollama
+  ddev logs ollama
   assert_success
   health_checks
 }
