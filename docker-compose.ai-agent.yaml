@@ -24,16 +24,16 @@ services:
     labels:
       <<: *ddev-common-ai-agent-labels
 
-  supabase-db:
-    container_name: ddev-${DDEV_SITENAME}-supabase-db
-    image: supabase/postgres:15.1.0.104
+  ai-db:
+    container_name: ddev-${DDEV_SITENAME}-ai-db
+    image: postgres:16
     restart: no
     environment:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_DB=postgres
     volumes:
-      - supabase_db_data:/var/lib/postgresql/data
+      - ai_db_data:/var/lib/postgresql/data
     labels:
       <<: *ddev-common-ai-agent-labels
 
@@ -51,4 +51,4 @@ services:
 
 volumes:
   n8n_data: {}
-  supabase_db_data: {}
+  ai_db_data: {}
