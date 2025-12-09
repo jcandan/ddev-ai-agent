@@ -43,6 +43,12 @@ health_checks() {
   run curl -sfI https://${PROJNAME}.ddev.site:5678
   assert_output --partial "HTTP/2 200"
 
+  run ddev exec -s ai-db sh -lc '
+    pg_isready -h localhost -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+  '
+  assert_success
+  assert_output --partial "accepting connections"
+
   # SearXNG JSON search should return HTTP 200.
   run ddev exec -s web sh -lc '
     curl -sS -w "%{http_code}" "http://searxng:8080/search?q=test&format=json" -o /dev/null
