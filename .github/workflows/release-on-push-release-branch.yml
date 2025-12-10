@@ -9,7 +9,11 @@ on:
       - alpha
 
 jobs:
-  tag-and-release:
+  # ----------------------------
+  # Stable releases from main
+  # ----------------------------
+  release:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     # Needed so the action can push tags and create releases.
@@ -30,32 +34,78 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-          # Let commit messages decide bump:
-          # - feat:            -> minor
-          # - fix:             -> patch
-          # - feat!/fix!/BREAKING CHANGE -> major
-          #
-          # Tags are plain SemVer (e.g. 0.1.0), no "v" prefix.
           tag_prefix: ""
 
-          # Only main is "stable"
+          # Only main is a stable release branch.
           release_branches: main
 
-          # These are treated as pre-release branches
-          pre_release_branches: rc,beta,alpha
-
-          # Optional: only create a tag when commits demand a release
-          default_bump: false
-
+          # Normal semver behaviour on main.
+          default_bump: patch
+          # default_prerelease_bump is irrelevant here.
           default_prerelease_bump: prerelease
 
       - name: Create GitHub Release with generated notes
-        # Only create a release if a new tag was produced.
         if: ${{ steps.tag_version.outputs.new_tag != '' }}
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.tag_version.outputs.new_tag }}
-
-          # Let GitHub generate release notes from commits/PRs.
-          # This uses the "Generate release notes" feature, not the changelog body.
           generateReleaseNotes: true
+          # Stable release, not a prerelease.
+          prerelease: false
+          # Use default 'legacy' latest behaviour.
+
+  # ----------------------------
+  # Pre-releases from alpha/beta/rc
+  # ----------------------------
+  prerelease:
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository with tags
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Bump prerelease version and create tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+          tag_prefix: ""
+
+          # We still consider only main as “stable”.
+          release_branches: main
+
+          # Pre-release branches we care about:
+          pre_release_branches: rc,beta,alpha
+
+          # Don’t auto-start a new major/minor/patch series.
+          default_bump: false
+
+          # If commit analysis finds no explicit bump,
+          # bump just the pre-release identifier:
+          # e.g. 1.0.0-alpha.3 -> 1.0.0-alpha.4
+          default_prerelease_bump: prerelease
+
+          # On pre-release branches, ignore feat/fix/etc for bump type
+          # so that default_prerelease_bump is always used.
+          # (These map directly to semantic-release releaseRules with release=false)
+          custom_release_rules: "feat:false,fix:false,perf:false,refactor:false"
+
+      - name: Create GitHub pre-release with generated notes
+        if: ${{ steps.tag_version.outputs.new_tag != '' }}
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.tag_version.outputs.new_tag }}
+          generateReleaseNotes: true
+
+          # Mark as a prerelease in GitHub UI
+          prerelease: true
+
+          # Optional: don’t let this become the “Latest release” badge
+          makeLatest: "false"
