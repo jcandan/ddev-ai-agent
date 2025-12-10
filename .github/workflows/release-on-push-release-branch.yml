@@ -86,16 +86,11 @@ jobs:
 
           # Don’t auto-start a new major/minor/patch series.
           default_bump: false
+          default_prerelease_bump: false
 
-          # If commit analysis finds no explicit bump,
-          # bump just the pre-release identifier:
+          # Bump just the pre-release identifier:
           # e.g. 1.0.0-alpha.3 -> 1.0.0-alpha.4
-          default_prerelease_bump: prerelease
-
-          # On pre-release branches, ignore feat/fix/etc for bump type
-          # so that default_prerelease_bump is always used.
-          # (These map directly to semantic-release releaseRules with release=false)
-          custom_release_rules: "feat:false,fix:false,perf:false,refactor:false"
+          custom_release_rules: "feat:prerelease,fix:prerelease,breaking:prerelease"
 
       - name: Create GitHub pre-release with generated notes
         if: ${{ steps.tag_version.outputs.new_tag != '' }}
