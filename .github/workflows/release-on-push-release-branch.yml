@@ -90,7 +90,7 @@ jobs:
 
           # Bump just the pre-release identifier:
           # e.g. 1.0.0-alpha.3 -> 1.0.0-alpha.4
-          custom_release_rules: "feat:prerelease,fix:prerelease,breaking:prerelease"
+          custom_release_rules: "feat:prerelease,fix:prerelease,*!:prerelease,breaking:prerelease"
 
       - name: Create GitHub pre-release with generated notes
         if: ${{ steps.tag_version.outputs.new_tag != '' }}
