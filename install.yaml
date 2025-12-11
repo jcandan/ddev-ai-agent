@@ -4,5 +4,7 @@ project_files:
   - docker-compose.ai-agent.yaml
   - docker-compose.ollama.yaml
   - searxng/settings.yml
+  - ai-db/init/01-enable-pgvector.sql
+
 
 ddev_version_constraint: '>= v1.24.3'
