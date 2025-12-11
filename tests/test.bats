@@ -43,11 +43,17 @@ health_checks() {
   run curl -sfI https://${PROJNAME}.ddev.site:5678
   assert_output --partial "HTTP/2 200"
 
+  # ai-db Postgres should be accepting connections.
   run ddev exec -s ai-db sh -lc '
     pg_isready -h localhost -U "$POSTGRES_USER" -d "$POSTGRES_DB"
   '
   assert_success
   assert_output --partial "accepting connections"
+
+  # pgvector extension should be installed in ai-db.
+  run ddev exec -s ai-db sh -lc 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tAc "SELECT 1 FROM pg_extension WHERE extname = '\''vector'\''"'
+  assert_success
+  assert_output "1"
 
   # SearXNG JSON search should return HTTP 200.
   run ddev exec -s web sh -lc '
